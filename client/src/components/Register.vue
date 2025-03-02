@@ -54,7 +54,7 @@
             />
             <div v-if="errors.password" class="invalid-feedback">{{ errors.password }}</div>
             <div class="form-text text-muted">
-              Требования: 8-30 символов, минимум одна заглавная буква, одна строчная буква и цифра
+              Требования: 8-30 символов, Допустимые символы: буквы (A-Z, a-z), цифры (0-9), дефисы (-) и подчёркивания (_)
             </div>
           </div>
 
@@ -144,7 +144,7 @@ export default {
       }
 
       // Валидация пароля
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,30}$/;
+      const passwordRegex = /^[a-zA-Z0-9_-]{8,30}$/;
       if (!this.registerForm.password) {
         this.errors.password = 'Пароль обязателен';
         isValid = false;

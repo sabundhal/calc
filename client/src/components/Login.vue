@@ -12,6 +12,7 @@
             <input
               type="text"
               class="form-control"
+              :class="{ 'is-invalid': errors.username }"
               id="loginUsername"
               v-model="loginForm.username"
               placeholder="Введите имя пользователя"
@@ -27,11 +28,16 @@
             <input
               type="password"
               class="form-control"
+              :class="{ 'is-invalid': errors.password }"
               id="loginPassword"
               v-model="loginForm.password"
               placeholder="Введите пароль"
+              @input="clearError('password')"
             />
-            <div class="form-text text-muted">Минимальная длина: 8 символов</div>
+            <div v-if="errors.password" class="invalid-feedback">{{ errors.password }}</div>
+            <div class="form-text text-muted">
+              Требования: 8-30 символов, Допустимые символы: буквы (A-Z, a-z), цифры (0-9), дефисы (-) и подчёркивания (_)
+            </div>
           </div>
 
           <div class="btn-group" role="group">
@@ -56,6 +62,7 @@
 <script>
 import axios from 'axios';
 import router from '@/router';
+import Alert from './Alert.vue';
 
 export default {
   data() {
@@ -65,11 +72,17 @@ export default {
         username: '',
         password: '',
       },
+      errors: {
+        username: '',
+        password: '',
+      },
       message: '',
       showMessage: false,
     };
   },
-
+components: {
+    alert: Alert,
+  },
   methods: {
     startYandexAuth() {
       console.log('Кнопка "Войти через Яндекс" нажата');
@@ -168,6 +181,36 @@ export default {
       alert('Ошибка при входе через Яндекс. Попробуйте снова.');
     });
 },
+validateForm() {
+      this.errors = { username: '', password: '' };
+      let isValid = true;
+
+      // Валидация имени пользователя
+      if (!this.loginForm.username.trim()) {
+        this.errors.username = 'Имя пользователя обязательно';
+        isValid = false;
+      } else if (this.loginForm.username.length < 3 || this.loginForm.username.length > 30) {
+        this.errors.username = 'Имя должно быть от 3 до 30 символов';
+        isValid = false;
+      } else if (!/^[a-zA-Z0-9_-]+$/.test(this.loginForm.username)) {
+        this.errors.username = 'Недопустимые символы в имени';
+        isValid = false;
+      }
+
+
+
+      // Валидация пароля
+      const passwordRegex = /^[a-zA-Z0-9_-]{8,30}$/;
+      if (!this.loginForm.password) {
+        this.errors.password = 'Пароль обязателен';
+        isValid = false;
+      } else if (!passwordRegex.test(this.loginForm.password)) {
+        this.errors.password = 'Пароль не соответствует требованиям';
+        isValid = false;
+      }
+
+      return isValid;
+    },
 
     handleLoginSubmit() {
       const payload = {
@@ -264,3 +307,7 @@ export default {
 },
 };
 </script>
+
+.is-invalid {
+  border-color: #dc3545; /* Красная рамка */
+}
